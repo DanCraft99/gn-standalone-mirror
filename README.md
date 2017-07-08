@@ -1,5 +1,5 @@
 # gn-standalone-mirror
-Google GN Build Tool mirror. The mirror code builds with build-in GN bootstrap script for Windows/Ubuntu Linux/Mac OS X.
+Google GN Build Tool mirror.
 
 GN is a meta build system from Google Chrome/Chromium development team. It implements clean tooling language and good set of features. For more information, follow the links:
 1) Google GN project https://chromium.googlesource.com/chromium/src/tools/gn/
@@ -7,7 +7,7 @@ GN is a meta build system from Google Chrome/Chromium development team. It imple
 
 As integral part of the Chromium source three, the GN source relies heavily on the underlying Chromium source tree for its base code. To build GN, the best approach is to checking out the Gigabytes of Chromium code in hours and build the GN tools in few minutes. To save the long checkout time, there have been scripts to checkout the required source that is sufficient to build the GN binary using the built-in bootstrap script. Follow https://gist.github.com/mohamed/4fa7eb75807463d4dfa3 For the link. 
 
-Since the GN boostrap sciprt is not maintained regularlily, the bootstrap build often fails for mostly irrelevant changes in the supporting Chromiumcode. This repo aims to maintain a Point Release that builds out of box for Windows/Linux/MacOS X.
+Since the GN boostrap script is not maintained regularlily, the bootstrap build often fails for mostly irrelevant changes in the supporting Chromium code. This repo aims to maintain a Point Release that builds out of box for Windows/Linux/MacOS X.
 
 
 
