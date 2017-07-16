@@ -1,0 +1,15 @@
+[submodule "gn-standalone\\tools\\gn"]
+	path = gn-standalone\\tools\\gn
+	url = https://chromium.googlesource.com/chromium/src/tools/gn
+[submodule "gn-standalone/base"]
+	path = gn-standalone/base
+	url = https://chromium.googlesource.com/chromium/src/base
+[submodule "gn-standalone/build"]
+	path = gn-standalone/build
+	url = https://chromium.googlesource.com/chromium/src/build
+[submodule "gn-standalone/config"]
+	path = gn-standalone/config
+	url = https://chromium.googlesource.com/chromium/src/build/config
+[submodule "gn-standalone/testing\\gtest"]
+	path = gn-standalone/testing\\gtest
+	url = https://chromium.googlesource.com/chromium/testing/gtest
