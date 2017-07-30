@@ -9,6 +9,12 @@ As integral part of the Chromium source three, the GN source relies heavily on t
 
 Since the GN boostrap script is not maintained regularlily, the bootstrap build often fails for mostly irrelevant changes in the supporting Chromium code. This repo aims to maintain a Point Release that builds out of box for Windows/Linux/MacOS X with and only with the bootstrap script.
 
+To pull the code with submodules
+git clone --recursive https://github.com/DanCraft99/gn-standalone-mirror
+
+To pull in the latest code
+git submodule update
+
 Links:
 1) Basic //build directory for use with Chromium's GN https://github.com/timniederhausen/gn-build
 2) GN Group https://groups.google.com/a/chromium.org/forum/#!forum/gn-dev
