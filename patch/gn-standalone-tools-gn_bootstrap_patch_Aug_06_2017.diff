@@ -1,0 +1,124 @@
+diff --git a/bootstrap/bootstrap.py b/bootstrap/bootstrap.py
+index 8beca90..9946ae6 100755
+--- a/bootstrap/bootstrap.py
++++ b/bootstrap/bootstrap.py
+@@ -20,6 +20,7 @@ import errno
+ import logging
+ import optparse
+ import os
++import platform
+ import shutil
+ import subprocess
+ import sys
+@@ -88,6 +89,13 @@ def run_build(tempdir, options):
+     # Preserve the executable permission bit.
+     shutil.copy2(out_gn, options.output)
+ 
++def windows_target_build_arch():
++    # Target build architecture set by vcvarsall.bat
++    target_arch = os.environ.get('Platform')
++    if target_arch in ['x64', 'x86']: return target_arch
++
++    if platform.machine().lower() in ['x86_64', 'amd64']: return 'x64'
++    return 'x86'
+ 
+ def main(argv):
+   parser = optparse.OptionParser(description=sys.modules[__name__].__doc__)
+@@ -363,8 +371,12 @@ def write_gn_ninja(path, root_gen_dir, options):
+         '/GR-',
+         '/D_HAS_EXCEPTIONS=0',
+     ])
+-    # TODO(tim): Support for 64bit builds?
+-    ldflags.extend(['/MACHINE:x86', '/DEBUG'])
++
++    target_arch = windows_target_build_arch()
++    if target_arch == 'x64':
++        ldflags.extend(['/MACHINE:x64'])
++    else:
++        ldflags.extend(['/MACHINE:x86'])
+ 
+   static_libraries = {
+       'base': {'sources': [], 'tool': 'cxx', 'include_dirs': []},
+@@ -436,6 +448,7 @@ def write_gn_ninja(path, root_gen_dir, options):
+       'base/memory/ref_counted_memory.cc',
+       'base/memory/singleton.cc',
+       'base/memory/shared_memory_handle.cc',
++      'base/memory/shared_memory_tracker.cc',
+       'base/memory/weak_ptr.cc',
+       'base/message_loop/incoming_task_queue.cc',
+       'base/message_loop/message_loop.cc',
+@@ -449,6 +462,7 @@ def write_gn_ninja(path, root_gen_dir, options):
+       'base/metrics/histogram_base.cc',
+       'base/metrics/histogram_functions.cc',
+       'base/metrics/histogram_samples.cc',
++      'base/metrics/histogram_snapshot_manager.cc',
+       'base/metrics/metrics_hashes.cc',
+       'base/metrics/persistent_histogram_allocator.cc',
+       'base/metrics/persistent_memory_allocator.cc',
+@@ -467,7 +481,6 @@ def write_gn_ninja(path, root_gen_dir, options):
+       'base/process/process_metrics.cc',
+       'base/profiler/scoped_profile.cc',
+       'base/profiler/scoped_tracker.cc',
+-      'base/profiler/tracked_time.cc',
+       'base/rand_util.cc',
+       'base/run_loop.cc',
+       'base/sequence_token.cc',
+@@ -535,10 +548,9 @@ def write_gn_ninja(path, root_gen_dir, options):
+       'base/trace_event/heap_profiler_allocation_context_tracker.cc',
+       'base/trace_event/heap_profiler_allocation_register.cc',
+       'base/trace_event/heap_profiler_event_filter.cc',
+-      'base/trace_event/heap_profiler_event_writer.cc',
++      'base/trace_event/heap_profiler_heap_dump_writer.cc',
+       'base/trace_event/heap_profiler_serialization_state.cc',
+       'base/trace_event/heap_profiler_stack_frame_deduplicator.cc',
+-      'base/trace_event/heap_profiler_string_deduplicator.cc',
+       'base/trace_event/heap_profiler_type_name_deduplicator.cc',
+       'base/trace_event/malloc_dump_provider.cc',
+       'base/trace_event/memory_allocator_dump.cc',
+@@ -551,8 +563,6 @@ def write_gn_ninja(path, root_gen_dir, options):
+       'base/trace_event/memory_peak_detector.cc',
+       'base/trace_event/memory_usage_estimator.cc',
+       'base/trace_event/process_memory_dump.cc',
+-      'base/trace_event/process_memory_maps.cc',
+-      'base/trace_event/process_memory_totals.cc',
+       'base/trace_event/sharded_allocation_register.cc',
+       'base/trace_event/trace_buffer.cc',
+       'base/trace_event/trace_config.cc',
+@@ -568,6 +578,7 @@ def write_gn_ninja(path, root_gen_dir, options):
+       'base/tracking_info.cc',
+       'base/unguessable_token.cc',
+       'base/values.cc',
++      'base/value_iterators.cc',
+       'base/vlog.cc',
+   ])
+ 
+@@ -799,6 +810,7 @@ def write_gn_ninja(path, root_gen_dir, options):
+         'version.lib',
+         'winmm.lib',
+         'ws2_32.lib',
++        'Shlwapi.lib',
+     ])
+ 
+   # we just build static libraries that GN needs
+diff --git a/desc_builder.cc b/desc_builder.cc
+index 965ec92..fce7919 100644
+--- a/desc_builder.cc
++++ b/desc_builder.cc
+@@ -273,13 +273,13 @@ class TargetDescBuilder : public BaseDescBuilder {
+                                    target_->visibility().AsValue());
+ 
+     if (what(variables::kTestonly))
+-      res->SetBooleanWithoutPathExpansion(variables::kTestonly,
+-                                          target_->testonly());
++      res->SetKey(variables::kTestonly,
++                  base::Value(target_->testonly()));
+ 
+     if (is_binary_output) {
+       if (what(variables::kCheckIncludes))
+-        res->SetBooleanWithoutPathExpansion(variables::kCheckIncludes,
+-                                            target_->check_includes());
++        res->SetKey(variables::kCheckIncludes,
++                    base::Value(target_->check_includes()));
+ 
+       if (what(variables::kAllowCircularIncludesFrom)) {
+         auto labels = base::MakeUnique<base::ListValue>();
