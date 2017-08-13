@@ -11,18 +11,23 @@ Since the GN boostrap script is not maintained regularlily, the bootstrap build 
 
 Build Steps:
 1) To pull the code with submodules:
-git clone --recursive https://github.com/DanCraft99/gn-standalone-mirror
+
+    git clone --recursive https://github.com/DanCraft99/gn-standalone-mirror
 
 2) To pull in the latest code:
-git submodule update
+
+    git submodule update
 
 3) Apply the latest patch:
-cd gn-standalone-mirror/gn-standalone/tools/gn/bootstrap
-patch -p2 < ../../../../patch/gn_bootstrap_patch.diff
+
+    cd gn-standalone-mirror/gn-standalone/tools/gn/bootstrap
+    patch -p2 < ../../../../patch/gn_bootstrap_patch.diff
 
 4) Build
-(optional) python bootstrap.py --help
-python bootstrap.py -s --no-clean
+
+    (optional) python bootstrap.py --help
+    
+    python bootstrap.py -s --no-clean
 
 Links:
 1) Basic //build directory for use with Chromium's GN https://github.com/timniederhausen/gn-build
