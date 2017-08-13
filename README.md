@@ -15,6 +15,8 @@ git clone --recursive https://github.com/DanCraft99/gn-standalone-mirror
 To pull in the latest code:
 git submodule update
 
+Apply the latest patch
+
 Links:
 1) Basic //build directory for use with Chromium's GN https://github.com/timniederhausen/gn-build
 2) GN Group https://groups.google.com/a/chromium.org/forum/#!forum/gn-dev
