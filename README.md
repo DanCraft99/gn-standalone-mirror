@@ -9,6 +9,9 @@ As integral part of the Chromium source three, the GN source relies heavily on t
 
 Since the GN boostrap script is not maintained regularlily, the bootstrap build often fails for mostly irrelevant changes in the supporting Chromium code. This repo aims to maintain a Point Release that builds out of box for Windows/Linux/MacOS X with and only with the bootstrap script.
 
+Dependency:
+GN generates low-level "ninja" build files and uses ninja to do the real building job. You will need to have ninja binary included in the system environemnt PATH. 
+
 Build Steps:
 1) To pull the code with submodules:
 
@@ -34,3 +37,5 @@ Links:
 2) GN Group https://groups.google.com/a/chromium.org/forum/#!forum/gn-dev
 3) Search for "gn standalone"
 4) gist at https://gist.github.com/mohamed/4fa7eb75807463d4dfa3 for script to check out standalone gn code and its dependencies. 
+5) Ninja build system at https://github.com/ninja-build/ninja
+6) Other ninja generators, esp CMake and Meson, at https://github.com/ninja-build/ninja/wiki/List-of-generators-producing-ninja-build-files.
