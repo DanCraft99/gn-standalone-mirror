@@ -19,7 +19,8 @@ Build Steps:
 
 2) To pull in the latest code:
 
-    git submodule update
+    git submodule update --init --recursive (for missing out the --recursive flag at initial check out)
+    git submodule update (for subsequent check out)
 
 3) Apply the latest patch:
 
