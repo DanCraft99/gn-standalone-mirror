@@ -1,8 +1,16 @@
 diff --git a/bootstrap/bootstrap.py b/bootstrap/bootstrap.py
-index 004d81c..abe6053 100755
+index 004d81c..9962f4a 100755
 --- a/bootstrap/bootstrap.py
 +++ b/bootstrap/bootstrap.py
-@@ -457,6 +457,7 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -179,6 +179,7 @@ def build_gn_with_ninja_manually(tempdir, options):
+ 
+   write_buildflag_header_manually(root_gen_dir, 'base/debug/debugging_flags.h',
+       {
++          'ENABLE_LOCATION_SOURCE': 'true',
+           'ENABLE_PROFILING': 'false',
+           'CAN_UNWIND_WITH_FRAME_POINTERS': 'false'
+       })
+@@ -457,6 +458,7 @@ def write_gn_ninja(path, root_gen_dir, options):
        'base/message_loop/message_pump_default.cc',
        'base/metrics/bucket_ranges.cc',
        'base/metrics/field_trial.cc',
@@ -10,7 +18,7 @@ index 004d81c..abe6053 100755
        'base/metrics/field_trial_param_associator.cc',
        'base/metrics/histogram.cc',
        'base/metrics/histogram_base.cc',
-@@ -507,6 +508,7 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -507,6 +509,7 @@ def write_gn_ninja(path, root_gen_dir, options):
        'base/task_scheduler/scheduler_lock_impl.cc',
        'base/task_scheduler/scheduler_single_thread_task_runner_manager.cc',
        'base/task_scheduler/scheduler_worker.cc',
@@ -18,7 +26,7 @@ index 004d81c..abe6053 100755
        'base/task_scheduler/scheduler_worker_pool_impl.cc',
        'base/task_scheduler/scheduler_worker_pool_params.cc',
        'base/task_scheduler/scheduler_worker_stack.cc',
-@@ -527,6 +529,7 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -527,6 +530,7 @@ def write_gn_ninja(path, root_gen_dir, options):
        'base/threading/sequenced_task_runner_handle.cc',
        'base/threading/sequenced_worker_pool.cc',
        'base/threading/simple_thread.cc',
@@ -26,7 +34,7 @@ index 004d81c..abe6053 100755
        'base/threading/thread.cc',
        'base/threading/thread_checker_impl.cc',
        'base/threading/thread_collision_warner.cc',
-@@ -607,7 +610,6 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -607,7 +611,6 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/synchronization/condition_variable_posix.cc',
          'base/synchronization/lock_impl_posix.cc',
          'base/synchronization/read_write_lock_posix.cc',
@@ -34,7 +42,7 @@ index 004d81c..abe6053 100755
          'base/sys_info_posix.cc',
          'base/task_scheduler/task_tracker_posix.cc',
          'base/threading/platform_thread_internal_posix.cc',
-@@ -615,8 +617,6 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -615,8 +618,6 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/threading/thread_local_storage_posix.cc',
          'base/threading/worker_pool_posix.cc',
          'base/time/time_conversion_posix.cc',
@@ -43,7 +51,7 @@ index 004d81c..abe6053 100755
          'base/trace_event/heap_profiler_allocation_register_posix.cc',
      ])
      static_libraries['libevent'] = {
-@@ -662,7 +662,10 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -662,7 +663,10 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/process/process_linux.cc',
          'base/process/process_metrics_linux.cc',
          'base/strings/sys_string_conversions_posix.cc',
@@ -54,7 +62,7 @@ index 004d81c..abe6053 100755
          'base/threading/platform_thread_linux.cc',
      ])
      if is_linux:
-@@ -709,6 +712,7 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -709,6 +713,7 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/process/process_iterator_mac.cc',
          'base/process/process_metrics_mac.cc',
          'base/strings/sys_string_conversions_mac.mm',
