@@ -10,7 +10,16 @@ As integral part of the Chromium source three, the GN source relies heavily on t
 Since the GN boostrap script is not maintained regularlily, the bootstrap build often fails for mostly irrelevant changes in the supporting Chromium code. This repo aims to maintain a Point Release that builds out of box for Windows/Linux/MacOS X with and only with the bootstrap script.
 
 Dependency:
+1) Ninja Build 
 GN generates low-level "ninja" build files and uses ninja to do the real building job. You will need to have ninja binary included in the system environemnt PATH. 
+
+2) msvcrt64.bat for Windows build
+
+    a) Use the Windows SDK menus from Windows Startup Menu. Or
+
+    b) Use the following link at https://gist.github.com/DanCraft99/3a99be44e26a1cd878b8578863cfcef6 for setup.
+
+
 
 Build Steps:
 1) To pull the code with submodules:
