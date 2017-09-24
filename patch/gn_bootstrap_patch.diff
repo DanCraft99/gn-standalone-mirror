@@ -1,8 +1,16 @@
 diff --git a/bootstrap/bootstrap.py b/bootstrap/bootstrap.py
-index b274fa8..a779606 100755
+index b274fa8..5714138 100755
 --- a/bootstrap/bootstrap.py
 +++ b/bootstrap/bootstrap.py
-@@ -605,7 +605,6 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -546,6 +546,7 @@ def write_gn_ninja(path, root_gen_dir, options):
+       'base/timer/timer.cc',
+       'base/trace_event/category_registry.cc',
+       'base/trace_event/event_name_filter.cc',
++      'base/trace_event/freed_object_tracker.cc',
+       'base/trace_event/heap_profiler_allocation_context.cc',
+       'base/trace_event/heap_profiler_allocation_context_tracker.cc',
+       'base/trace_event/heap_profiler_allocation_register.cc',
+@@ -605,7 +606,6 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/strings/string16.cc',
          'base/synchronization/condition_variable_posix.cc',
          'base/synchronization/lock_impl_posix.cc',
@@ -10,7 +18,7 @@ index b274fa8..a779606 100755
          'base/sys_info_posix.cc',
          'base/task_scheduler/task_tracker_posix.cc',
          'base/threading/platform_thread_internal_posix.cc',
-@@ -764,7 +763,6 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -764,7 +764,6 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/sync_socket_win.cc',
          'base/synchronization/condition_variable_win.cc',
          'base/synchronization/lock_impl_win.cc',
