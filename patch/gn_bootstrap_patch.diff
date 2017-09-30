@@ -1,24 +1,32 @@
 diff --git a/bootstrap/bootstrap.py b/bootstrap/bootstrap.py
-index b274fa8..5714138 100755
+index 601d533..438fdcf 100755
 --- a/bootstrap/bootstrap.py
 +++ b/bootstrap/bootstrap.py
-@@ -546,6 +546,7 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -536,7 +536,6 @@ def write_gn_ninja(path, root_gen_dir, options):
+       'base/threading/thread_local_storage.cc',
+       'base/threading/thread_restrictions.cc',
+       'base/threading/thread_task_runner_handle.cc',
+-      'base/threading/worker_pool.cc',
+       'base/time/clock.cc',
+       'base/time/default_clock.cc',
+       'base/time/default_tick_clock.cc',
+@@ -546,7 +545,6 @@ def write_gn_ninja(path, root_gen_dir, options):
        'base/timer/timer.cc',
        'base/trace_event/category_registry.cc',
        'base/trace_event/event_name_filter.cc',
-+      'base/trace_event/freed_object_tracker.cc',
+-      'base/trace_event/freed_object_tracker.cc',
        'base/trace_event/heap_profiler_allocation_context.cc',
        'base/trace_event/heap_profiler_allocation_context_tracker.cc',
        'base/trace_event/heap_profiler_allocation_register.cc',
-@@ -605,7 +606,6 @@ def write_gn_ninja(path, root_gen_dir, options):
-         'base/strings/string16.cc',
-         'base/synchronization/condition_variable_posix.cc',
-         'base/synchronization/lock_impl_posix.cc',
--        'base/synchronization/read_write_lock_posix.cc',
-         'base/sys_info_posix.cc',
-         'base/task_scheduler/task_tracker_posix.cc',
+@@ -611,7 +609,6 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/threading/platform_thread_internal_posix.cc',
-@@ -764,7 +764,6 @@ def write_gn_ninja(path, root_gen_dir, options):
+         'base/threading/platform_thread_posix.cc',
+         'base/threading/thread_local_storage_posix.cc',
+-        'base/threading/worker_pool_posix.cc',
+         'base/time/time_conversion_posix.cc',
+         'base/trace_event/heap_profiler_allocation_register_posix.cc',
+     ])
+@@ -764,13 +761,11 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/sync_socket_win.cc',
          'base/synchronization/condition_variable_win.cc',
          'base/synchronization/lock_impl_win.cc',
@@ -26,3 +34,9 @@ index b274fa8..5714138 100755
          'base/synchronization/waitable_event_watcher_win.cc',
          'base/synchronization/waitable_event_win.cc',
          'base/sys_info_win.cc',
+         'base/threading/platform_thread_win.cc',
+         'base/threading/thread_local_storage_win.cc',
+-        'base/threading/worker_pool_win.cc',
+         'base/time/time_win.cc',
+         'base/timer/hi_res_timer_manager_win.cc',
+         'base/trace_event/heap_profiler_allocation_register_win.cc',
