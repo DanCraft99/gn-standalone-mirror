@@ -1,8 +1,8 @@
 diff --git a/bootstrap/bootstrap.py b/bootstrap/bootstrap.py
-index f154ed2..438fdcf 100755
+index 2f2dbaa..bdfbe76 100755
 --- a/bootstrap/bootstrap.py
 +++ b/bootstrap/bootstrap.py
-@@ -761,13 +761,11 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -769,13 +769,11 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/sync_socket_win.cc',
          'base/synchronization/condition_variable_win.cc',
          'base/synchronization/lock_impl_win.cc',
