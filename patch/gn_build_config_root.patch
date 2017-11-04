@@ -1,5 +1,5 @@
 diff --git a/build_settings.cc b/build_settings.cc
-index 4cf2b86..d349c06 100644
+index 4cf2b86..f712988 100644
 --- a/build_settings.cc
 +++ b/build_settings.cc
 @@ -7,6 +7,7 @@
@@ -25,7 +25,7 @@ index 4cf2b86..d349c06 100644
  
 +void BuildSettings::SetBuildConfigRootPath(const base::FilePath& r) {
 +  DCHECK(r.value()[r.value().size() - 1] != base::FilePath::kSeparators[0]);
-+  if (r == base::FilePath("GN_INSTALL_PATH"))
++  if (r == UTF8ToFilePath("GN_INSTALL_PATH"))
 +  {
 +    PathService::Get(base::DIR_EXE, &build_config_root_path_);
 +    build_config_root_path_utf8_ = FilePathToUTF8(build_config_root_path_);
