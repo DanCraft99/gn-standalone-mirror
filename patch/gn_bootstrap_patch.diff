@@ -1,16 +1,8 @@
 diff --git a/bootstrap/bootstrap.py b/bootstrap/bootstrap.py
-index 2f2dbaa..7f9cb3c 100755
+index 7098995..b892585 100755
 --- a/bootstrap/bootstrap.py
 +++ b/bootstrap/bootstrap.py
-@@ -481,6 +481,7 @@ def write_gn_ninja(path, root_gen_dir, options):
-       'base/metrics/sample_vector.cc',
-       'base/metrics/sparse_histogram.cc',
-       'base/metrics/statistics_recorder.cc',
-+      'base/observer_list_threadsafe.cc',
-       'base/path_service.cc',
-       'base/pending_task.cc',
-       'base/pickle.cc',
-@@ -769,17 +770,16 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -771,17 +771,16 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/sync_socket_win.cc',
          'base/synchronization/condition_variable_win.cc',
          'base/synchronization/lock_impl_win.cc',
@@ -29,7 +21,7 @@ index 2f2dbaa..7f9cb3c 100755
          'base/win/enum_variant.cc',
          'base/win/event_trace_controller.cc',
          'base/win/event_trace_provider.cc',
-@@ -793,9 +793,11 @@ def write_gn_ninja(path, root_gen_dir, options):
+@@ -795,9 +794,11 @@ def write_gn_ninja(path, root_gen_dir, options):
          'base/win/registry.cc',
          'base/win/resource_util.cc',
          'base/win/scoped_bstr.cc',
