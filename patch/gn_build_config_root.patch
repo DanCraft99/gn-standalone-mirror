@@ -1,5 +1,5 @@
 diff --git a/build_settings.cc b/build_settings.cc
-index 4cf2b86..f712988 100644
+index 79b8365..5ecd8dd 100644
 --- a/build_settings.cc
 +++ b/build_settings.cc
 @@ -7,6 +7,7 @@
@@ -9,8 +9,8 @@ index 4cf2b86..f712988 100644
 +#include "base/path_service.h"
  #include "tools/gn/filesystem_utils.h"
  
- BuildSettings::BuildSettings() {
-@@ -18,6 +19,8 @@ BuildSettings::BuildSettings(const BuildSettings& other)
+ BuildSettings::BuildSettings() = default;
+@@ -17,6 +18,8 @@ BuildSettings::BuildSettings(const BuildSettings& other)
        secondary_source_path_(other.secondary_source_path_),
        python_path_(other.python_path_),
        build_config_file_(other.build_config_file_),
@@ -19,7 +19,7 @@ index 4cf2b86..f712988 100644
        arg_file_template_path_(other.arg_file_template_path_),
        build_dir_(other.build_dir_),
        build_args_(other.build_args_) {}
-@@ -35,6 +38,20 @@ void BuildSettings::SetRootPath(const base::FilePath& r) {
+@@ -33,6 +36,20 @@ void BuildSettings::SetRootPath(const base::FilePath& r) {
    root_path_utf8_ = FilePathToUTF8(root_path_);
  }
  
@@ -40,8 +40,8 @@ index 4cf2b86..f712988 100644
  void BuildSettings::SetSecondarySourcePath(const SourceDir& d) {
    secondary_source_path_ = GetFullPath(d).NormalizePathSeparatorsTo('/');
  }
-@@ -61,6 +78,16 @@ base::FilePath BuildSettings::GetFullPathSecondary(
-   return dir.Resolve(secondary_source_path_).NormalizePathSeparatorsTo('/');
+@@ -70,6 +87,21 @@ base::FilePath BuildSettings::GetFullPathSecondary(const std::string& path,
+       .NormalizePathSeparatorsTo('/');
  }
  
 +base::FilePath BuildSettings::GetFullPathBuildConfig(const SourceFile& file) const
@@ -49,16 +49,21 @@ index 4cf2b86..f712988 100644
 +  return file.Resolve(build_config_root_path_).NormalizePathSeparatorsTo('/');
 +}
 +
-+base::FilePath BuildSettings::GetFullPathBuildConfig(const SourceDir& dir) const
++base::FilePath BuildSettings::BuildSettings::GetFullPathBuildConfig(const SourceDir& dir) const
 +{
 +  return dir.Resolve(build_config_root_path_).NormalizePathSeparatorsTo('/');
++}
++
++base::FilePath BuildSettings::GetFullPathBuildConfig(const std::string& path, bool as_file) const
++{
++  return ResolvePath(path, as_file, build_config_root_path_).NormalizePathSeparatorsTo('/');
 +}
 +
  void BuildSettings::ItemDefined(std::unique_ptr<Item> item) const {
    DCHECK(item);
    if (!item_defined_callback_.is_null())
 diff --git a/build_settings.h b/build_settings.h
-index 670f996..6bf0d44 100644
+index 52f3625..48817ca 100644
 --- a/build_settings.h
 +++ b/build_settings.h
 @@ -57,6 +57,10 @@ class BuildSettings {
@@ -72,17 +77,18 @@ index 670f996..6bf0d44 100644
    // Path to a file containing the default text to use when running `gn args`.
    const SourceFile& arg_file_template_path() const {
      return arg_file_template_path_;
-@@ -86,6 +90,9 @@ class BuildSettings {
-   base::FilePath GetFullPathSecondary(const SourceFile& file) const;
-   base::FilePath GetFullPathSecondary(const SourceDir& dir) const;
+@@ -95,6 +99,10 @@ class BuildSettings {
+   base::FilePath GetFullPathSecondary(const std::string& path,
+                                       bool as_file) const;
  
 +  base::FilePath GetFullPathBuildConfig(const SourceFile& file) const;
 +  base::FilePath GetFullPathBuildConfig(const SourceDir& dir) const;
++  base::FilePath GetFullPathBuildConfig(const std::string& path, bool as_file) const;
 +
    // Called when an item is defined from a background thread.
    void ItemDefined(std::unique_ptr<Item> item) const;
    void set_item_defined_callback(ItemDefinedCallback cb) {
-@@ -116,6 +123,8 @@ class BuildSettings {
+@@ -125,6 +133,8 @@ class BuildSettings {
    base::FilePath python_path_;
  
    SourceFile build_config_file_;
@@ -92,10 +98,10 @@ index 670f996..6bf0d44 100644
    SourceDir build_dir_;
    Args build_args_;
 diff --git a/config.cc b/config.cc
-index fcc5fa6..119b1c8 100644
+index e021fe4..533a283 100644
 --- a/config.cc
 +++ b/config.cc
-@@ -26,6 +26,16 @@ bool Config::OnResolved(Err* err) {
+@@ -27,6 +27,16 @@ bool Config::OnResolved(Err* err) {
    DCHECK(!resolved_);
    resolved_ = true;
  
@@ -113,16 +119,16 @@ index fcc5fa6..119b1c8 100644
      // Subconfigs, flatten.
      //
 diff --git a/function_exec_script.cc b/function_exec_script.cc
-index 8c4909c..34282cd 100644
+index 0f6397c..0e3b6ba 100644
 --- a/function_exec_script.cc
 +++ b/function_exec_script.cc
-@@ -139,6 +139,10 @@ Value RunExecScript(Scope* scope,
-   if (err->has_error())
+@@ -144,6 +144,10 @@ Value RunExecScript(Scope* scope,
      return Value();
-   base::FilePath script_path = build_settings->GetFullPath(script_source);
+   base::FilePath script_path =
+       build_settings->GetFullPath(script_source_path, true);
 +  if (!base::PathExists(script_path))
 +  {
-+    script_path = build_settings->GetFullPathBuildConfig(script_source);
++      script_path = build_settings->GetFullPathBuildConfig(script_source_path, true);
 +  }
    if (!build_settings->secondary_source_path().empty() &&
        !base::PathExists(script_path)) {
@@ -172,10 +178,10 @@ index 7626551..7aaaf22 100644
      if (err->has_error())
        return Value();
 diff --git a/input_file_manager.cc b/input_file_manager.cc
-index 9fd3def..3b6f622 100644
+index 6fe3cae..53126c2 100644
 --- a/input_file_manager.cc
 +++ b/input_file_manager.cc
-@@ -42,19 +42,40 @@ bool DoLoadFile(const LocationRange& origin,
+@@ -43,19 +43,40 @@ bool DoLoadFile(const LocationRange& origin,
    base::FilePath primary_path = build_settings->GetFullPath(name);
    ScopedTrace load_trace(TraceItem::TRACE_FILE_LOAD, name.value());
    if (!file->Load(primary_path)) {
@@ -223,10 +229,10 @@ index 9fd3def..3b6f622 100644
                   "Unable to load \"" + FilePathToUTF8(primary_path) + "\".");
        return false;
 diff --git a/setup.cc b/setup.cc
-index 7fc4a2e..a2b932a 100644
+index 36b6ec5..a0ad318 100644
 --- a/setup.cc
 +++ b/setup.cc
-@@ -746,7 +746,19 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline) {
+@@ -751,7 +751,19 @@ bool Setup::FillOtherConfig(const base::CommandLine& cmdline) {
      return false;
    }
    build_settings_.set_build_config_file(
