@@ -13,3 +13,11 @@
 [submodule "gn-standalone/testing/gtest"]
 	path = gn-standalone/testing/gtest
 	url = https://chromium.googlesource.com/chromium/testing/gtest
+[submodule "libcxx"]
+	path = gn-standalone/buildtools/third_party/libc++/trunk
+	url = https://chromium.googlesource.com/chromium/llvm-project/libcxx
+	branch = master
+[submodule "libcxxabi"]
+	path = gn-standalone/buildtools/third_party/libc++abi/trunk
+	url = https://chromium.googlesource.com/chromium/llvm-project/libcxxabi
+	branch = master
