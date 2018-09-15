@@ -1,3 +1,69 @@
+diff --git a/action_target_generator.cc b/action_target_generator.cc
+index ca3986e..6ce9a82 100644
+--- a/action_target_generator.cc
++++ b/action_target_generator.cc
+@@ -5,6 +5,8 @@
+ #include "tools/gn/action_target_generator.h"
+ 
+ #include "base/stl_util.h"
++#include "base/files/file_path.h"
++#include "base/files/file_util.h"
+ #include "tools/gn/build_settings.h"
+ #include "tools/gn/err.h"
+ #include "tools/gn/filesystem_utils.h"
+@@ -109,6 +111,19 @@ bool ActionTargetGenerator::FillScript() {
+           scope_->settings()->build_settings()->root_path_utf8());
+   if (err_->has_error())
+     return false;
++
++  if (!scope_->settings()->build_settings()->build_config_root_path().empty()) {
++    base::FilePath configFilePath = scope_->settings()->build_settings()->GetFullPathBuildConfig(script_file);
++    if (base::PathExists(configFilePath))
++    {
++      std::string p = FilePathToUTF8(configFilePath);
++#if defined(OS_WIN)
++      p = "/" + p;
++#endif
++      script_file = SourceFile(p);
++    }
++  }
++
+   target_->action_values().set_script(script_file);
+   return true;
+ }
+diff --git a/bootstrap/'environment.x64 b/bootstrap/'environment.x64
+new file mode 100644
+index 0000000..6168d8d
+Binary files /dev/null and b/bootstrap/'environment.x64 differ
+diff --git a/bootstrap/bootstrap.py b/bootstrap/bootstrap.py
+index ebc3237..353d5ec 100755
+--- a/bootstrap/bootstrap.py
++++ b/bootstrap/bootstrap.py
+@@ -950,6 +950,7 @@ def write_gn_ninja(path, root_gen_dir, options, windows_x64_toolchain):
+         'base/timer/hi_res_timer_manager_win.cc',
+         'base/trace_event/heap_profiler_allocation_register_win.cc',
+         'base/trace_event/trace_event_etw_export_win.cc',
++        'base/win/com_init_util.cc',
+         'base/win/core_winrt_util.cc',
+         'base/win/enum_variant.cc',
+         'base/win/event_trace_controller.cc',
+diff --git a/bootstrap/build_vs.ninja.template b/bootstrap/build_vs.ninja.template
+index 88bba37..ff475e5 100644
+--- a/bootstrap/build_vs.ninja.template
++++ b/bootstrap/build_vs.ninja.template
+@@ -22,7 +22,7 @@ rule alink_thin
+   rspfile_content = ${in_newline}
+ 
+ rule link
+-  command = ninja -t msvc -e $arch -- $ld /nologo /OUT:${out} /PDB:${out}.pdb @${out}.rsp
++  command = ninja -t msvc -e $arch -- $ld /nologo /DEBUG /OUT:${out} /PDB:${out}.pdb @${out}.rsp
+   description = LINK ${out}
+   rspfile = ${out}.rsp
+   rspfile_content = ${in_newline} ${libs} ${solibs} ${ldflags}
+diff --git a/bootstrap/environment.x64 b/bootstrap/environment.x64
+new file mode 100644
+index 0000000..d419ac7
+Binary files /dev/null and b/bootstrap/environment.x64 differ
 diff --git a/build_settings.cc b/build_settings.cc
 index 79b8365..5ecd8dd 100644
 --- a/build_settings.cc
@@ -98,7 +164,7 @@ index 52f3625..48817ca 100644
    SourceDir build_dir_;
    Args build_args_;
 diff --git a/config.cc b/config.cc
-index e021fe4..533a283 100644
+index e021fe4..57b8ac6 100644
 --- a/config.cc
 +++ b/config.cc
 @@ -27,6 +27,16 @@ bool Config::OnResolved(Err* err) {
@@ -107,76 +173,90 @@ index e021fe4..533a283 100644
  
 +  if (!settings()->build_settings()->build_config_root_path().empty() &&
 +       label().name() == "default_include_dirs") {
-+     std::string filepath =
++     std::string configFilePath =
 +         settings()->build_settings()->build_config_root_path_utf8();
 + #if defined(OS_WIN)
-+     filepath = "/" + filepath;
++     configFilePath = "/" + configFilePath;
 + #endif
-+     own_values_.include_dirs().push_back(SourceDir(filepath));
++     own_values_.include_dirs().push_back(SourceDir(configFilePath));
 +  }
 +
    if (!configs_.empty()) {
      // Subconfigs, flatten.
      //
 diff --git a/function_exec_script.cc b/function_exec_script.cc
-index 0f6397c..0e3b6ba 100644
+index 0f6397c..840d9d0 100644
 --- a/function_exec_script.cc
 +++ b/function_exec_script.cc
 @@ -144,6 +144,10 @@ Value RunExecScript(Scope* scope,
      return Value();
    base::FilePath script_path =
        build_settings->GetFullPath(script_source_path, true);
-+  if (!base::PathExists(script_path))
-+  {
++  if (!build_settings->build_config_root_path().empty() &&
++      !base::PathExists(script_path)) {
 +      script_path = build_settings->GetFullPathBuildConfig(script_source_path, true);
 +  }
    if (!build_settings->secondary_source_path().empty() &&
        !base::PathExists(script_path)) {
      // Fall back to secondary source root when the file doesn't exist.
 diff --git a/function_rebase_path.cc b/function_rebase_path.cc
-index 7626551..7aaaf22 100644
+index 7626551..59dcfd4 100644
 --- a/function_rebase_path.cc
 +++ b/function_rebase_path.cc
 @@ -4,6 +4,8 @@
  
  #include <stddef.h>
  
-+#include "base/strings/string_util.h"
++#include "base/files/file_path.h"
 +#include "base/files/file_util.h"
  #include "tools/gn/build_settings.h"
  #include "tools/gn/filesystem_utils.h"
  #include "tools/gn/functions.h"
-@@ -69,16 +71,28 @@ Value ConvertOnePath(const Scope* scope,
+@@ -64,12 +66,16 @@ Value ConvertOnePath(const Scope* scope,
+ 
+   if (!value.VerifyTypeIs(Value::STRING, err))
+     return result;
++
++  const BuildSettings* build_settings = scope->settings()->build_settings();
+   const std::string& string_value = value.string_value();
+ 
    bool looks_like_dir = ValueLooksLikeDir(string_value);
  
++
    // System-absolute output special case.
 -  if (convert_to_system_absolute) {
-+  if (convert_to_system_absolute || !scope->settings()->build_settings()->build_config_root_path().empty()) {
++  if (convert_to_system_absolute ||
++      !build_settings->build_config_root_path().empty()) {
      base::FilePath system_path;
      if (looks_like_dir) {
        system_path = scope->settings()->build_settings()->GetFullPath(
-+        from_dir.ResolveRelativeDir(value, err,
-+          scope->settings()->build_settings()->root_path_utf8()));
-+      if (!scope->settings()->build_settings()->build_config_root_path().empty() &&
-+          !base::PathExists(system_path)) {
-+        system_path = scope->settings()->build_settings()->GetFullPathBuildConfig(
-           from_dir.ResolveRelativeDir(value, err,
--              scope->settings()->build_settings()->root_path_utf8()));
-+            scope->settings()->build_settings()->build_config_root_path_utf8()));
-+      }
-     } else {
-       system_path = scope->settings()->build_settings()->GetFullPath(
-           from_dir.ResolveRelativeFile(value, err,
-               scope->settings()->build_settings()->root_path_utf8()));
-+      if (!scope->settings()->build_settings()->build_config_root_path().empty() &&
-+          !base::PathExists(system_path)) {
-+        system_path = scope->settings()->build_settings()->GetFullPathBuildConfig(
-+          from_dir.ResolveRelativeFile(value, err,
-+            scope->settings()->build_settings()->build_config_root_path_utf8()));
-+      }
-     }
+@@ -83,6 +89,26 @@ Value ConvertOnePath(const Scope* scope,
      if (err->has_error())
        return Value();
+ 
++    if (!build_settings->build_config_root_path().empty() &&
++        !base::PathExists(system_path)) {
++      base::FilePath system_config_path;
++      if (looks_like_dir) {
++        system_config_path = build_settings->GetFullPathBuildConfig(
++          from_dir.ResolveRelativeDir(value, err,
++            build_settings->build_config_root_path_utf8()));
++      }
++      else {
++        system_config_path = build_settings->GetFullPathBuildConfig(
++          from_dir.ResolveRelativeFile(value, err,
++            build_settings->build_config_root_path_utf8()));
++      }
++      if (err->has_error())
++        return Value();
++
++      if (base::PathExists(system_config_path))
++        system_path = system_config_path;
++    }
++
+     result = Value(function, FilePathToUTF8(system_path));
+     if (looks_like_dir)
+       MakeSlashEndingMatchInput(string_value, &result.string_value());
 diff --git a/input_file_manager.cc b/input_file_manager.cc
 index 6fe3cae..53126c2 100644
 --- a/input_file_manager.cc
@@ -253,40 +333,3 @@ index 36b6ec5..a0ad318 100644
  
    // Targets to check.
    const Value* check_targets_value =
-diff --git a/value_extractors.cc b/value_extractors.cc
-index ff009ce..4b56fbb 100644
---- a/value_extractors.cc
-+++ b/value_extractors.cc
-@@ -6,8 +6,11 @@
- 
- #include <stddef.h>
- 
-+#include "base/strings/string_util.h"
-+#include "base/files/file_util.h"
- #include "tools/gn/build_settings.h"
- #include "tools/gn/err.h"
-+#include "tools/gn/filesystem_utils.h"
- #include "tools/gn/label.h"
- #include "tools/gn/source_dir.h"
- #include "tools/gn/source_file.h"
-@@ -67,8 +70,18 @@ struct RelativeFileConverter {
-         current_dir(current_dir_in) {
-   }
-   bool operator()(const Value& v, SourceFile* out, Err* err) const {
--    *out = current_dir.ResolveRelativeFile(v, err,
--                                           build_settings->root_path_utf8());
-+    *out = current_dir.ResolveRelativeFile(
-+        v, err, build_settings->root_path_utf8());
-+    if (!build_settings->build_config_root_path().empty()) {
-+       base::FilePath rf_path = build_settings->GetFullPath(*out);
-+       if (!base::PathExists(rf_path)) {
-+         std::string p = FilePathToUTF8(build_settings->GetFullPathBuildConfig(*out));
-+ #if defined(OS_WIN)
-+         p = "/" + p;
-+ #endif
-+         *out = SourceFile(p);
-+       }
-+    }
-     return !err->has_error();
-   }
-   const BuildSettings* build_settings;
