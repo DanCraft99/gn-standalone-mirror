@@ -1,3 +1,10 @@
+(Update: GN now has its new home at https://gn.googlesource.com/. And it can now be built using a single python build script.)
+This repository has tracked up to the date of April 2018. Please chec out the new home for latest GN code.)
+
+Stand Alone GN
+This repo has a patch to make GN run as standalone binary with [build] setup folder placed anywhere/ or fixed in your system. This flexibility is made possible with a custom BUILD_CONFIG_ROOT in your project .gn file. With this patch, GN can run as a standalone setup for any small to medium size projects and you do not need to always copy [build] setup folder in every project folder.)
+
+
 # gn-standalone-mirror
 Google GN Build Tool mirror++.
 
